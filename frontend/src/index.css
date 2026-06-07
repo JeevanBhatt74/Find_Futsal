@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base Reset ──────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid #005129;
+    outline-offset: 2px;
+  }
+}
+
+/* ─── Stitch Design System Utilities ──────────────────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+.court-card-gradient {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ─── Component Layer (used by non-homepage pages) ────────────────────────── */
+@layer components {
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2
+           px-5 py-2.5 rounded-lg text-sm font-semibold
+           transition-all duration-200
+           disabled:opacity-50 disabled:pointer-events-none
+           select-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-on-primary
+           hover:bg-primary-container active:scale-[0.98]
+           shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply btn bg-canvas text-on-surface border border-outline-variant
+           hover:bg-surface-container active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn text-on-surface hover:bg-surface-container
+           active:scale-[0.98];
+  }
+
+  .btn-sm {
+    @apply px-3.5 py-1.5 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-7 py-3.5 text-sm;
+  }
+
+  .input {
+    @apply w-full px-4 py-2.5 rounded-lg
+           border border-outline-variant bg-surface
+           text-on-surface text-sm placeholder-outline
+           transition-all duration-200
+           focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-on-surface mb-1.5;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5
+           rounded-full text-xs font-medium;
+  }
+  .badge-available   { @apply badge bg-alert-success-bg text-alert-success-text; }
+  .badge-locked      { @apply badge bg-alert-warning-bg text-alert-warning-text; }
+  .badge-booked      { @apply badge bg-alert-danger-bg text-alert-danger-text; }
+
+  .card {
+    @apply bg-surface rounded-lg border border-outline-variant shadow-card;
+  }
+  .card-hover {
+    @apply card hover:shadow-md hover:border-primary-container/50 transition-all duration-200;
+  }
+
+  .skeleton {
+    @apply bg-surface-container-high rounded animate-pulse;
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+}
