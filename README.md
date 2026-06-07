@@ -1,4 +1,4 @@
-# ⚽ FindFutsal — Full-Stack Monorepo
+# ⚽ FindFutsal: Full-Stack Monorepo
 
 > Nepal's fastest futsal court booking platform. From search to confirmed slot in under 60 seconds.
 
