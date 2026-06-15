@@ -67,7 +67,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/profile"
-                  className="w-10 h-10 rounded-full border-2 border-emerald-accent overflow-hidden hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-sm"
+                  className="w-10 h-10 rounded-full border-2 border-emerald-500 overflow-hidden hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-sm"
                   title="Profile & Settings"
                 >
                   <img
@@ -118,7 +118,7 @@ export default function Navbar() {
                   clsx(
                     'px-4 py-2.5 rounded-lg text-sm font-bold no-underline transition-all',
                     isActive 
-                      ? 'bg-emerald-accent/10 text-primary' 
+                      ? 'bg-emerald-50 text-primary' 
                       : 'text-on-surface-variant hover:bg-surface-variant/30'
                   )
                 }
