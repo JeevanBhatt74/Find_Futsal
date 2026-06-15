@@ -16,6 +16,9 @@ export interface IUser extends Document {
   isActive: boolean;
   isDeleted: boolean; // Soft delete field
   deletedAt?: Date; // Soft delete timestamp
+  gameReminders?: boolean;
+  exclusiveOffers?: boolean;
+  bookingAlerts?: boolean;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -92,6 +95,21 @@ const userSchema = new Schema<IUser>(
       trim: true,
       maxlength: [300, 'Bio cannot exceed 300 characters.'],
       default: null,
+    },
+
+    gameReminders: {
+      type: Boolean,
+      default: true,
+    },
+
+    exclusiveOffers: {
+      type: Boolean,
+      default: true,
+    },
+
+    bookingAlerts: {
+      type: Boolean,
+      default: false,
     },
 
     isVerified: {
