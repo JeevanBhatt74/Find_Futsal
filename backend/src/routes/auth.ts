@@ -61,6 +61,44 @@ const loginValidation = [
     .withMessage('Password is required.'),
 ];
 
+const updateProfileValidation = [
+  body('fullName')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 80 })
+    .withMessage('Full name must be between 2 and 80 characters.'),
+  body('phone')
+    .optional()
+    .trim()
+    .matches(/^(\+977|977)?[9][678]\d{8}$/)
+    .withMessage('Must be a valid Nepali phone number (+977 9XXXXXXXXX format).'),
+  body('profileImage')
+    .optional()
+    .trim()
+    .custom((value) => {
+      if (!value) return true;
+      if (value.startsWith('data:image/')) return true;
+      try {
+        new URL(value);
+        return true;
+      } catch (err) {
+        throw new Error('Must be a valid image URL or base64 image.');
+      }
+    }),
+  body('gameReminders')
+    .optional()
+    .isBoolean()
+    .withMessage('gameReminders must be a boolean.'),
+  body('exclusiveOffers')
+    .optional()
+    .isBoolean()
+    .withMessage('exclusiveOffers must be a boolean.'),
+  body('bookingAlerts')
+    .optional()
+    .isBoolean()
+    .withMessage('bookingAlerts must be a boolean.'),
+];
+
 // ─── Route Handlers ───────────────────────────────────────────────────────────
 
 /**
@@ -205,6 +243,81 @@ router.get(
       success: true,
       data: req.user,
     });
+  }
+);
+
+/**
+ * @route   PUT /api/v1/auth/profile
+ * @desc    Update current user profile
+ * @access  Protected
+ */
+router.put(
+  '/profile',
+  protect,
+  updateProfileValidation,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        success: false,
+        status: 'validation_error',
+        message: errors.array()[0].msg,
+        errors: errors.array(),
+      });
+      return;
+    }
+
+    try {
+      if (!req.user) {
+        return next(new AppError('Not authorized.', 401));
+      }
+
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return next(new AppError('User not found.', 404));
+      }
+
+      const { fullName, phone, profileImage, gameReminders, exclusiveOffers, bookingAlerts } = req.body;
+
+      if (fullName) user.fullName = fullName;
+      
+      if (phone) {
+        const existingPhone = await User.findOne({ phone, _id: { $ne: user._id } });
+        if (existingPhone) {
+          return next(new AppError('A user with this phone number already exists.', 409));
+        }
+        user.phone = phone;
+      }
+
+      if (profileImage !== undefined) {
+        user.profileImage = profileImage;
+      }
+
+      if (gameReminders !== undefined) {
+        user.gameReminders = gameReminders;
+      }
+
+      if (exclusiveOffers !== undefined) {
+        user.exclusiveOffers = exclusiveOffers;
+      }
+
+      if (bookingAlerts !== undefined) {
+        user.bookingAlerts = bookingAlerts;
+      }
+
+      await user.save();
+
+      const userJSON = user.toJSON();
+      delete userJSON.password;
+
+      res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully!',
+        data: userJSON,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
