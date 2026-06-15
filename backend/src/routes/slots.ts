@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import Slot, { BookingStatus } from '../models/Slot';
+import Venue from '../models/Venue';
 import { AppError } from '../middleware/errorHandler';
 import { protect } from '../middleware/auth';
 
@@ -36,10 +37,47 @@ router.get(
       }
 
       // Query slots
-      const slots = await Slot.find({
+      let slots = await Slot.find({
         venueId,
         startTime: { $gte: startOfDay, $lte: endOfDay },
       }).sort({ startTime: 1 });
+
+      // If no slots exist for this date, auto-generate them on a 1-hour basis (06:00 - 23:00 local time)
+      if (slots.length === 0) {
+        const venue = await Venue.findById(venueId);
+        if (!venue) {
+          return next(new AppError('Venue not found.', 404));
+        }
+
+        const dateParts = dateStr.split('-');
+        if (dateParts.length === 3) {
+          const year = parseInt(dateParts[0], 10);
+          const month = parseInt(dateParts[1], 10) - 1;
+          const day = parseInt(dateParts[2], 10);
+
+          const generatedSlots = [];
+          // 06:00 to 23:00 local Nepal time (UTC+5:45)
+          // Local H:00 corresponds to UTC (H - 5) hours and -45 minutes
+          for (let hour = 6; hour <= 22; hour++) {
+            const startTime = new Date(Date.UTC(year, month, day, hour - 5, -45, 0));
+            const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // 1 hour duration
+
+            generatedSlots.push({
+              venueId: venue._id,
+              startTime,
+              endTime,
+              baseCost: venue.pricePerHour,
+              currency: venue.currency || 'NPR',
+              status: BookingStatus.AVAILABLE,
+            });
+          }
+
+          // Bulk insert the generated slots into the DB
+          slots = await Slot.insertMany(generatedSlots);
+          // Sort slots by startTime
+          slots.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+        }
+      }
 
       // Transform slots: if status is Locked and lock is expired, treat it as Available
       const parsedSlots = slots.map((slot) => {
