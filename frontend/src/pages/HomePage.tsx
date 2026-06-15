@@ -41,7 +41,7 @@ export default function HomePage() {
   // Search state
   const [location, setLocation] = useState('')
   const [date, setDate] = useState('')
-  const [timeSlot, setTimeSlot] = useState('Morning (06:00 - 12:00)')
+  const [timeSlot, setTimeSlot] = useState('06:00 AM - 07:00 AM')
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,7 +100,7 @@ export default function HomePage() {
               </Link>
               <Link
                 to="/profile"
-                className="w-10 h-10 rounded-full border-2 border-emerald-accent overflow-hidden hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-sm"
+                className="w-10 h-10 rounded-full border-2 border-emerald-500 overflow-hidden hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-sm"
                 title="Profile & Settings"
               >
                 <img
@@ -219,9 +219,23 @@ export default function HomePage() {
                   value={timeSlot}
                   onChange={(e) => setTimeSlot(e.target.value)}
                 >
-                  <option>Morning (06:00 - 12:00)</option>
-                  <option>Afternoon (12:00 - 17:00)</option>
-                  <option>Evening (17:00 - 23:00)</option>
+                  <option>06:00 AM - 07:00 AM</option>
+                  <option>07:00 AM - 08:00 AM</option>
+                  <option>08:00 AM - 09:00 AM</option>
+                  <option>09:00 AM - 10:00 AM</option>
+                  <option>10:00 AM - 11:00 AM</option>
+                  <option>11:00 AM - 12:00 PM</option>
+                  <option>12:00 PM - 01:00 PM</option>
+                  <option>01:00 PM - 02:00 PM</option>
+                  <option>02:00 PM - 03:00 PM</option>
+                  <option>03:00 PM - 04:00 PM</option>
+                  <option>04:00 PM - 05:00 PM</option>
+                  <option>05:00 PM - 06:00 PM</option>
+                  <option>06:00 PM - 07:00 PM</option>
+                  <option>07:00 PM - 08:00 PM</option>
+                  <option>08:00 PM - 09:00 PM</option>
+                  <option>09:00 PM - 10:00 PM</option>
+                  <option>10:00 PM - 11:00 PM</option>
                 </select>
               </div>
             </div>

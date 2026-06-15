@@ -10,6 +10,7 @@ interface AuthState {
   isAuthenticated: boolean
   setAuth: (user: User, token: string) => void
   clearAuth: () => void
+  updateUser: (user: User) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,6 +28,10 @@ export const useAuthStore = create<AuthState>()(
       clearAuth: () => {
         localStorage.removeItem('ff_token')
         set({ user: null, token: null, isAuthenticated: false })
+      },
+
+      updateUser: (user) => {
+        set({ user })
       },
     }),
     { name: 'ff-auth' }
