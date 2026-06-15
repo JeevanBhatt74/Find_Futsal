@@ -57,6 +57,7 @@ export default {
         "on-error-container": "#93000a",
 
         // ── Legacy helpers (used by other pages) ──────────────────────────
+        "emerald-accent": "#10b981",
         "primary-hover": "#003e1f",
         "slate-text": "#1F2937",
         "cool-grey": "#4B5563",
