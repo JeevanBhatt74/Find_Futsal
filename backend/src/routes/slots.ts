@@ -104,7 +104,7 @@ router.get(
 
 /**
  * @route   POST /api/v1/slots/:id/lock
- * @desc    Acquire a 10-minute hold/lock on a specific available slot
+ * @desc    Acquire a 5-minute hold/lock on a specific available slot
  * @access  Protected
  */
 router.post(
@@ -187,7 +187,7 @@ router.post(
 
       res.status(200).json({
         success: true,
-        message: 'Slot locked successfully for 10 minutes.',
+        message: 'Slot locked successfully for 5 minutes.',
         data: updatedSlot.toJSON({ virtuals: true }),
       });
     } catch (error) {

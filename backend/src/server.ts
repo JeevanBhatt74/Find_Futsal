@@ -96,12 +96,18 @@ import authRouter from './routes/auth';
 import venueRouter from './routes/venues';
 import slotRouter from './routes/slots';
 import bookingRouter from './routes/bookings';
+import paymentsRouter from './routes/payments';
+import reviewsRouter from './routes/reviews';
+import adminRouter from './routes/admin';
 import initLockCleanupCron from './cron/lockCleanup';
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/venues', venueRouter);
 app.use('/api/v1/slots', slotRouter);
 app.use('/api/v1/bookings', bookingRouter);
+app.use('/api/v1/payments', paymentsRouter);
+app.use('/api/v1/reviews', reviewsRouter);
+app.use('/api/v1/admin', adminRouter);
 
 app.get('/api/v1', (_req: Request, res: Response) => {
   res.status(200).json({

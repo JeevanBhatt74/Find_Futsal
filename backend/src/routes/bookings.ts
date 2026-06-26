@@ -91,7 +91,7 @@ router.post(
       if (slot.isLockExpired) {
         return next(
           new AppError(
-            'Your 10-minute hold session on this slot has expired. Please select the slot again.',
+            'Your 5-minute hold session on this slot has expired. Please select the slot again.',
             400
           )
         );

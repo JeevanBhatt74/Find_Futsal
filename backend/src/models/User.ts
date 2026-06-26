@@ -138,7 +138,7 @@ const userSchema = new Schema<IUser>(
     toJSON: {
       transform: (_doc, ret) => {
         // Never expose sensitive fields in API responses
-        delete ret.__v;
+        delete (ret as any).__v;
         return ret;
       },
     },

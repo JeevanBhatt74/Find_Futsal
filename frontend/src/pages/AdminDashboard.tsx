@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { LayoutGrid, AlertCircle, Wrench, Settings, ArrowLeft, CheckCircle } from 'lucide-react'
+import { LayoutGrid, AlertCircle, Wrench, Settings, ArrowLeft, CheckCircle, Users, CreditCard, Calendar as CalendarIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
+import api from '@/lib/api'
 
 const MOCK_COURTS = [
   { id: 1, name: 'Court 1 (Premium Indoor)', status: 'Active' },
@@ -11,6 +12,22 @@ const MOCK_COURTS = [
 
 export default function AdminDashboard() {
   const [courts, setCourts] = useState(MOCK_COURTS)
+  const [stats, setStats] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get('/admin/stats')
+        setStats(response.data.data)
+      } catch (err) {
+        toast.error('Failed to load admin stats')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchStats()
+  }, [])
 
   const handleToggleMaintenance = (courtId: number) => {
     setCourts(prev =>
@@ -55,6 +72,34 @@ export default function AdminDashboard() {
           <div className="card px-4 py-2.5 bg-white border border-gray-100 flex items-center gap-2 shadow-xs rounded-[8px] text-[13px] font-bold text-cool-grey uppercase">
             <LayoutGrid size={15} className="text-primary" /> Active Console
           </div>
+        </div>
+      </div>
+
+      {/* Stats Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-cool-grey font-bold text-xs uppercase tracking-wider">
+            <Users size={16} /> Total Users
+          </div>
+          <h3 className="text-2xl font-bold text-slate-text">{isLoading ? '...' : stats?.metrics?.totalUsers || 0}</h3>
+        </div>
+        <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-cool-grey font-bold text-xs uppercase tracking-wider">
+            <CalendarIcon size={16} /> Total Bookings
+          </div>
+          <h3 className="text-2xl font-bold text-slate-text">{isLoading ? '...' : stats?.metrics?.totalBookings || 0}</h3>
+        </div>
+        <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-cool-grey font-bold text-xs uppercase tracking-wider">
+            <LayoutGrid size={16} /> Active Venues
+          </div>
+          <h3 className="text-2xl font-bold text-slate-text">{isLoading ? '...' : stats?.metrics?.totalVenues || 0}</h3>
+        </div>
+        <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
+            <CreditCard size={16} /> Revenue
+          </div>
+          <h3 className="text-2xl font-bold text-primary">Rs. {isLoading ? '...' : (stats?.metrics?.totalRevenue || 0).toLocaleString()}</h3>
         </div>
       </div>
 

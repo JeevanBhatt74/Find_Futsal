@@ -9,6 +9,7 @@ import { useBookingStore, useAuthStore } from '@/store'
 import { useVenueDetail } from '@/hooks/useVenues'
 import { useSlots } from '@/hooks/useSlots'
 import { useBookingMutations } from '@/hooks/useBooking'
+import { useReviews } from '@/hooks/useReviews'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
@@ -45,6 +46,7 @@ export default function VenueDetailPage() {
   // ── Live API Hooks ──
   const { data: venue, isLoading: isVenueLoading } = useVenueDetail(venueId)
   const { data: slots = [], isLoading: isSlotsLoading } = useSlots(venueId, selectedDate)
+  const { data: reviews = [] } = useReviews(venueId)
   const { lockSlotMutation } = useBookingMutations()
 
   const handleSlotSelect = (slot: Slot) => {
@@ -182,9 +184,38 @@ export default function VenueDetailPage() {
             </div>
 
             {/* Contact */}
-            <div className="mt-5 pt-5 border-t border-gray-100 flex items-center gap-2 text-sm text-gray-500 font-medium">
+            <div className="mt-5 pt-5 border-t border-gray-100 flex items-center gap-2 text-sm text-gray-500 font-medium mb-6">
               <Phone size={14} className="text-emerald-500" />
               {venue.contactPhone}
+            </div>
+
+            {/* Reviews */}
+            <div className="mt-5 pt-5 border-t border-gray-100">
+              <h4 className="text-lg font-semibold text-slate-text mb-4">Reviews ({reviews.length})</h4>
+              {reviews.length === 0 ? (
+                <p className="text-sm text-gray-400">No reviews yet.</p>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {reviews.map((r) => (
+                    <div key={r._id} className="p-4 bg-surface-muted rounded-lg flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs uppercase">
+                            {r.userId.profileImage ? <img src={r.userId.profileImage} className="w-full h-full rounded-full object-cover" /> : r.userId.fullName[0]}
+                          </div>
+                          <span className="font-semibold text-sm text-slate-text">{r.userId.fullName}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star size={12} className="text-amber-400" fill="currentColor" />
+                          <span className="text-sm font-bold text-slate-text">{r.rating}</span>
+                        </div>
+                      </div>
+                      {r.comment && <p className="text-sm text-gray-500 mt-1">{r.comment}</p>}
+                      <span className="text-xs text-gray-400">{format(new Date(r.createdAt), 'MMM d, yyyy')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

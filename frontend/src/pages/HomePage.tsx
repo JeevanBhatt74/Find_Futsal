@@ -3,33 +3,41 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store'
 import Logo from '@/components/layout/Logo'
 
-// ─── Mock venues matching the Stitch design exactly ─────────────────────────
 const FEATURED_COURTS = [
   {
     id: 'court-1',
-    name: 'Elite Arena Center',
-    location: 'Downtown District',
+    name: 'Dhuku Futsal Hub',
+    location: 'Baluwatar',
+    distance: '1.2 km from center',
     rating: 4.9,
-    price: '$45/hr',
+    price: 'Rs 1,800/hr',
+    slotsToday: 6,
     badge: { text: 'LIVE AVAILABILITY', position: 'right', style: 'bg-secondary-fixed text-on-secondary-fixed' },
+    amenities: ['Floodlights', 'Showers', 'Parking', 'Cafeteria'],
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDutFiPUSROLDIm2hymA2PDe8Loo8YXD2EjTbFvLg5w4SnsXjJNrprc6v_yWSjMwcgx1XqoJ8RagldzlymShbmDepQBw6RwzHaqDI8Mb2hjWEqjTOnSgXCVw_xR-DyhCblo1nsoGBfOOlt0KAkDnTEBo7BjPDOfeBTLgjk678p4IR7feHtxVccy_MEUc9R_7GU7l4veRm4JASlV86-zlmCEboWNOmnPbjdatj_jrdqb-FzaGDRGamVRC8zYU0DGrYnvLpT_0dJpHZs',
   },
   {
     id: 'court-2',
-    name: 'Sky-Line Rooftop',
-    location: 'North Valley Heights',
+    name: 'Shantinagar Futsal',
+    location: 'Shantinagar',
+    distance: '2.5 km from center',
     rating: 4.7,
-    price: '$60/hr',
+    price: 'Rs 1,500/hr',
+    slotsToday: 2,
     badge: null,
+    amenities: ['Floodlights', 'Parking', 'Cafeteria'],
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHYAwbuuNT8wCGl_u7n38Tf2Tfh3hQe0fXkkT78_ZBDNGk1cwSG_8wdOtqFeeezanXLouEaO0Abyrqy6_HsZtffYEYE21sDi0wgGe6MznjTw4-acuk8TtvqMVKDyWBmx6MfSBUgFUABdC2Sq-C2vN_3npanw5I2Y9TR7-rgKKA-rD_b1bYcozoACwITATkLQSSyPuHIzR0fz98BNF6dj-6QQL0V7dLY-sxlrDzMVbjdj1KQrZPW3fw5zEjoCZjSIq_MN1HpE3GFj8',
   },
   {
     id: 'court-3',
-    name: 'The Warehouse Pitch',
-    location: 'Old Town Industrial',
+    name: 'Field Futsal',
+    location: 'Sanepa',
+    distance: '4.8 km from center',
     rating: 4.8,
-    price: '$35/hr',
+    price: 'Rs 2,000/hr',
+    slotsToday: 0,
     badge: { text: 'PRO TURF', position: 'left', style: 'bg-primary-container text-on-primary-container' },
+    amenities: ['Showers', 'Parking', 'Cafeteria'],
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCfy8T51ixMd3CiaU9mwVb38Zf8nR3tZYKxkrpYotgnroSmKb_gEc-9O_WDpRtbEs4gbucjBbzlpy9IycOdEiKNApCHkh7cpONIhKoUh4_qhETMYtuTkOW0aHwKgq7AkBCdCn7grWY6LSQEDtrGMVuJcKmb8m_ym8mbkofY4OvDMrP0D5JEv2SATqCh2cMDBlD1DyfpLqbGhNlBzXP4jt9VIpJ8xno8GheWCpDJcM6ZspuN0HFlbVZHPiiE8E2CHu_ORJXRuiY_SQ8',
   },
 ]
@@ -321,53 +329,98 @@ export default function HomePage() {
 
           <div className="max-w-6xl mx-auto flex overflow-x-auto pb-lg gap-lg snap-x no-scrollbar">
             {FEATURED_COURTS.map((court) => (
-              <div key={court.id} className="bg-surface rounded-lg border border-outline-variant overflow-hidden group snap-start" style={{ minWidth: '320px' }}>
-                {/* Image */}
-                <div className="relative overflow-hidden" style={{ height: '192px' }}>
+              <div 
+                key={court.id} 
+                className="bg-surface-container-lowest border border-outline-variant hover:border-secondary rounded-xl overflow-hidden group transition-all duration-300 flex flex-col shadow-sm hover:shadow-md snap-start relative" 
+                style={{ minWidth: '340px' }}
+              >
+                <Link to="/venues" className="absolute inset-0 z-0" />
+                
+                {/* Image Header */}
+                <div className="relative h-48 overflow-hidden bg-surface-container-high">
                   <img
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     src={court.image}
                     alt={court.name}
                   />
-                  {court.badge && (
-                    <div
-                      className={`absolute top-sm font-label-bold px-sm rounded-full ${court.badge.style}`}
-                      style={{
-                        [court.badge.position === 'right' ? 'right' : 'left']: '8px',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                        fontSize: '12px',
-                      }}
-                    >
-                      {court.badge.text}
-                    </div>
-                  )}
+                  
+                  {/* Rating Badge */}
+                  <div className="absolute top-sm right-sm bg-surface/90 backdrop-blur-sm px-md py-1 rounded-full flex items-center gap-xs shadow-sm z-10">
+                    <span className="material-symbols-outlined text-secondary text-[16px] block" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      star
+                    </span>
+                    <span className="font-label-bold text-body-sm text-on-surface">
+                      {court.rating ? court.rating.toFixed(1) : '0.0'}
+                    </span>
+                  </div>
+
+                  {/* Slots Badge */}
+                  <div className="absolute bottom-sm left-sm z-10">
+                    {court.slotsToday > 0 ? (
+                      <div className="bg-primary/90 text-on-primary px-sm py-1 rounded-md flex items-center gap-xs text-[11px] font-bold tracking-wider uppercase shadow-sm">
+                        <div className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
+                        <span>{court.slotsToday} SLOTS TODAY</span>
+                      </div>
+                    ) : (
+                      <div className="bg-surface-variant/90 text-on-surface px-sm py-1 rounded-md text-[11px] font-bold tracking-wider uppercase shadow-sm">
+                        <span>NO SLOTS TODAY</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {/* Info */}
-                <div className="p-md">
+
+                {/* Details Body */}
+                <div className="p-md flex flex-col flex-grow relative z-10 pointer-events-none">
                   <div className="flex justify-between items-start mb-xs">
-                    <h4 className="font-h3 text-h3">{court.name}</h4>
-                    <div className="flex items-center text-primary">
-                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                      <span className="font-label-bold" style={{ marginLeft: '4px' }}>{court.rating}</span>
-                    </div>
+                    <h4 className="font-h3 text-h3 text-on-surface group-hover:text-primary transition-colors pr-sm leading-tight max-w-[70%]">
+                      {court.name}
+                    </h4>
+                    <span className="font-h3 text-h3 text-primary shrink-0 leading-none pt-1">
+                      {court.price}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-xs text-on-surface-variant text-body-sm mb-md">
-                    <span className="material-symbols-outlined text-sm">location_on</span>
-                    {court.location}
-                  </div>
-                  <div className="flex justify-between items-center mt-md pt-md border-t border-outline-variant">
-                    <div>
-                      <span className="text-on-surface-variant font-label-bold" style={{ fontSize: '12px', display: 'block', textTransform: 'uppercase' }}>Starting at</span>
-                      <span className="font-h3 text-primary">{court.price}</span>
+                  
+                  <p className="text-on-surface-variant text-body-sm flex items-center gap-xs mb-md font-medium">
+                    <span className="material-symbols-outlined text-[18px] text-outline">location_on</span>
+                    <span>{court.distance}</span>
+                    <span className="text-outline/40">|</span>
+                    <span className="text-[12px]">Kathmandu</span>
+                  </p>
+
+                  {/* Footer details */}
+                  <div className="mt-auto pt-md border-t border-outline-variant flex items-center justify-between pointer-events-auto">
+                    {/* Amenities list */}
+                    <div className="flex gap-xs text-outline">
+                      {court.amenities.includes('Showers') && (
+                        <span className="material-symbols-outlined text-[20px]" title="Shower available">shower</span>
+                      )}
+                      {court.amenities.includes('Floodlights') && (
+                        <span className="material-symbols-outlined text-[20px]" title="Lights available">light_mode</span>
+                      )}
+                      {court.amenities.includes('Parking') && (
+                        <span className="material-symbols-outlined text-[20px]" title="Parking available">local_parking</span>
+                      )}
+                      {court.amenities.includes('Cafeteria') && (
+                        <span className="material-symbols-outlined text-[20px]" title="Cafe available">restaurant</span>
+                      )}
                     </div>
-                    <Link
-                      to="/venues"
-                      className="bg-primary text-on-primary font-button text-button px-md py-sm rounded-lg hover:opacity-90"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      Book Now
-                    </Link>
+                    
+                    {/* Action button */}
+                    {court.slotsToday > 0 ? (
+                      <Link 
+                        to="/venues"
+                        className="bg-secondary text-on-secondary px-lg py-sm rounded-lg font-label-bold text-label-bold hover:bg-primary hover:text-white transition-all no-underline shadow-sm active:scale-95 block"
+                      >
+                        Book Now
+                      </Link>
+                    ) : (
+                      <Link 
+                        to="/venues"
+                        className="border-2 border-primary text-primary px-lg py-[6px] rounded-lg font-label-bold text-label-bold bg-white hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95 no-underline block"
+                      >
+                        Notify Me
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

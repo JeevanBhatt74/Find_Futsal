@@ -26,6 +26,7 @@ export interface IBooking extends Document {
   status: BookingStatus;
   paymentStatus: PaymentStatus;
   paymentRef?: string;
+  transactionId?: string;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -97,6 +98,12 @@ const bookingSchema = new Schema<IBooking>(
       type: String,
       trim: true,
       maxlength: [500, 'Notes cannot exceed 500 characters.'],
+    },
+
+    transactionId: {
+      type: String,
+      trim: true,
+      default: null,
     },
   },
   {
