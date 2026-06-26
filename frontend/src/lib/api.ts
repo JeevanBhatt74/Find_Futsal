@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useAuthStore } from '@/store'
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -11,7 +12,8 @@ const api = axios.create({
 // ─── Request Interceptor ──────────────────────────────────────────────────────
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('ff_token')
+    // Sync token from Zustand instead of localstorage directly to prevent desync
+    const token = useAuthStore.getState().token || localStorage.getItem('ff_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -26,6 +28,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('ff_token')
+      useAuthStore.getState().clearAuth() // Clear Zustand state too
       window.location.href = '/login'
     }
     return Promise.reject(error)

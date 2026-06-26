@@ -188,12 +188,28 @@ export default function ProfilePage() {
     setIsAvatarModalOpen(true)
   }
 
-  const handleSaveAvatar = () => {
+  const handleSaveAvatar = async () => {
     setProfileImage(tempProfileImage)
     setIsAvatarModalOpen(false)
-    toast.success('📷 Photo applied. Click "Save Profile" to submit.', {
-      position: 'bottom-center'
-    })
+    
+    // Auto-save the avatar directly to the backend so it persists on reload
+    try {
+      const response = await api.put('/auth/profile', {
+        fullName,
+        phone,
+        profileImage: tempProfileImage,
+        gameReminders,
+        exclusiveOffers,
+        bookingAlerts
+      })
+      updateUser(response.data.data)
+      toast.success('📷 Profile photo uploaded and saved successfully!', {
+        position: 'bottom-center'
+      })
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message ?? 'Could not save profile image to server.'
+      toast.error(errMsg, { position: 'bottom-center' })
+    }
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
