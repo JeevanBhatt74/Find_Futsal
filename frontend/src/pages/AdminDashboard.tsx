@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { LayoutGrid, AlertCircle, Wrench, Settings, ArrowLeft, CheckCircle, Users, CreditCard, Calendar as CalendarIcon } from 'lucide-react'
+import { Link, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { LayoutGrid, Settings, ArrowLeft, Users, CreditCard, Calendar as CalendarIcon, MapPin } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '@/lib/api'
-
-const MOCK_COURTS = [
-  { id: 1, name: 'Court 1 (Premium Indoor)', status: 'Active' },
-  { id: 2, name: 'Court 2 (Outdoor Turf)', status: 'Active' },
-  { id: 3, name: 'Court 3 (Training Pitch)', status: 'Under Maintenance' },
-]
+import AdminVenueManagement from '@/components/admin/AdminVenueManagement'
+import AdminBookingManagement from '@/components/admin/AdminBookingManagement'
 
 export default function AdminDashboard() {
-  const [courts, setCourts] = useState(MOCK_COURTS)
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Determine active tab from URL path
+  const currentPath = location.pathname
+  const activeTab = currentPath === '/admin/venues' ? 'venues' :
+                    currentPath === '/admin/bookings' ? 'bookings' : 'overview'
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -29,34 +31,8 @@ export default function AdminDashboard() {
     fetchStats()
   }, [])
 
-  const handleToggleMaintenance = (courtId: number) => {
-    setCourts(prev =>
-      prev.map(c => {
-        if (c.id === courtId) {
-          const newStatus = c.status === 'Active' ? 'Under Maintenance' : 'Active'
-          
-          if (newStatus === 'Under Maintenance') {
-            // Trigger design system toast specification
-            toast.success(`⚙️ State Change: Court ${courtId} successfully marked as 'Under Maintenance'. Grid updated globally.`, {
-              position: 'bottom-center',
-              duration: 5000,
-            })
-          } else {
-            toast.success(`⚙️ State Change: Court ${courtId} is now active. Grid updated globally.`, {
-              position: 'bottom-center',
-              duration: 5000,
-            })
-          }
-
-          return { ...c, status: newStatus }
-        }
-        return c
-      })
-    )
-  }
-
   return (
-    <div className="page-container py-10 max-w-4xl mx-auto">
+    <div className="page-container py-10 max-w-5xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-1.5 text-cool-grey hover:text-slate-text text-sm font-semibold mb-6 no-underline">
         <ArrowLeft size={16} />
         Back to Home
@@ -64,104 +40,93 @@ export default function AdminDashboard() {
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-[32px] font-bold text-slate-text mb-2">Venue Administrator Controls</h1>
-          <p className="body-regular">Manage court availability grid states, maintenance parameters, and configurations.</p>
-        </div>
-        
-        <div className="flex gap-2">
-          <div className="card px-4 py-2.5 bg-white border border-gray-100 flex items-center gap-2 shadow-xs rounded-[8px] text-[13px] font-bold text-cool-grey uppercase">
-            <LayoutGrid size={15} className="text-primary" /> Active Console
-          </div>
+          <h1 className="text-[32px] font-bold text-slate-text mb-2">Admin Dashboard</h1>
+          <p className="body-regular">Manage venues, bookings, and view platform analytics.</p>
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-cool-grey font-bold text-xs uppercase tracking-wider">
-            <Users size={16} /> Total Users
-          </div>
-          <h3 className="text-2xl font-bold text-slate-text">{isLoading ? '...' : stats?.metrics?.totalUsers || 0}</h3>
-        </div>
-        <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-cool-grey font-bold text-xs uppercase tracking-wider">
-            <CalendarIcon size={16} /> Total Bookings
-          </div>
-          <h3 className="text-2xl font-bold text-slate-text">{isLoading ? '...' : stats?.metrics?.totalBookings || 0}</h3>
-        </div>
-        <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-cool-grey font-bold text-xs uppercase tracking-wider">
-            <LayoutGrid size={16} /> Active Venues
-          </div>
-          <h3 className="text-2xl font-bold text-slate-text">{isLoading ? '...' : stats?.metrics?.totalVenues || 0}</h3>
-        </div>
-        <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
-            <CreditCard size={16} /> Revenue
-          </div>
-          <h3 className="text-2xl font-bold text-primary">Rs. {isLoading ? '...' : (stats?.metrics?.totalRevenue || 0).toLocaleString()}</h3>
-        </div>
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-6 space-x-6">
+        <button 
+          onClick={() => navigate('/admin')}
+          className={`pb-3 font-semibold text-sm transition-colors relative ${activeTab === 'overview' ? 'text-primary' : 'text-cool-grey hover:text-slate-text'}`}
+        >
+          <div className="flex items-center gap-2"><LayoutGrid size={16} /> Overview</div>
+          {activeTab === 'overview' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full" />}
+        </button>
+        <button 
+          onClick={() => navigate('/admin/venues')}
+          className={`pb-3 font-semibold text-sm transition-colors relative ${activeTab === 'venues' ? 'text-primary' : 'text-cool-grey hover:text-slate-text'}`}
+        >
+          <div className="flex items-center gap-2"><MapPin size={16} /> Venues</div>
+          {activeTab === 'venues' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full" />}
+        </button>
+        <button 
+          onClick={() => navigate('/admin/bookings')}
+          className={`pb-3 font-semibold text-sm transition-colors relative ${activeTab === 'bookings' ? 'text-primary' : 'text-cool-grey hover:text-slate-text'}`}
+        >
+          <div className="flex items-center gap-2"><CalendarIcon size={16} /> Bookings</div>
+          {activeTab === 'bookings' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full" />}
+        </button>
       </div>
 
-      <div className="card p-6 bg-white border border-gray-150 rounded-[12px] shadow-sm mb-6">
-        <h2 className="text-[20px] font-bold text-slate-text border-b border-gray-100 pb-3.5 mb-5 flex items-center gap-2">
-          <Settings size={20} className="text-primary" /> Real-time Court Availability Controls
-        </h2>
-
-        <div className="space-y-4">
-          {courts.map(court => (
-            <div
-              key={court.id}
-              className={`p-4 rounded-[8px] border transition-all duration-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
-                court.status === 'Under Maintenance'
-                  ? 'border-amber-200 bg-amber-50/20'
-                  : 'border-gray-150 bg-white hover:border-gray-250'
-              }`}
-            >
-              <div className="flex gap-3.5 items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  court.status === 'Under Maintenance' ? 'bg-amber-100 text-amber-800' : 'bg-primary/10 text-primary'
-                }`}>
-                  {court.status === 'Under Maintenance' ? <Wrench size={18} /> : <CheckCircle size={18} />}
+      {/* Main Content Area */}
+      <div>
+        <Routes>
+          <Route path="/" element={
+            <div className="animate-fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-cool-grey font-bold text-xs uppercase tracking-wider">
+                    <Users size={16} /> Total Users
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-text">{isLoading ? '...' : stats?.metrics?.totalUsers || 0}</h3>
                 </div>
-                <div>
-                  <h4 className="text-[15px] font-bold text-slate-text">{court.name}</h4>
-                  <p className={`text-[12px] font-medium mt-0.5 ${
-                    court.status === 'Under Maintenance' ? 'text-amber-800' : 'text-primary'
-                  }`}>
-                    Current State: {court.status}
-                  </p>
+                <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-cool-grey font-bold text-xs uppercase tracking-wider">
+                    <CalendarIcon size={16} /> Total Bookings
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-text">{isLoading ? '...' : stats?.metrics?.totalBookings || 0}</h3>
+                </div>
+                <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-cool-grey font-bold text-xs uppercase tracking-wider">
+                    <LayoutGrid size={16} /> Active Venues
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-text">{isLoading ? '...' : stats?.metrics?.totalVenues || 0}</h3>
+                </div>
+                <div className="card p-4 bg-white border border-gray-150 rounded-[12px] shadow-sm flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
+                    <CreditCard size={16} /> Revenue
+                  </div>
+                  <h3 className="text-2xl font-bold text-primary">Rs. {isLoading ? '...' : (stats?.metrics?.totalRevenue || 0).toLocaleString()}</h3>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t border-gray-50 sm:border-t-0 pt-3 sm:pt-0">
-                <span className={`badge text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                  court.status === 'Under Maintenance' ? 'badge-maintenance' : 'badge-available'
-                }`}>
-                  {court.status}
-                </span>
-
-                <button
-                  onClick={() => handleToggleMaintenance(court.id)}
-                  className={`btn btn-sm ${
-                    court.status === 'Under Maintenance'
-                      ? 'btn-primary'
-                      : 'btn-secondary !text-amber-800 !border-amber-200 hover:!bg-amber-50/30'
-                  }`}
-                >
-                  {court.status === 'Under Maintenance' ? 'Mark Active' : 'Toggle Maintenance'}
-                </button>
-              </div>
+              {stats?.recentUsers && stats.recentUsers.length > 0 && (
+                <div className="card p-6 bg-white border border-gray-150 rounded-[12px] shadow-sm mb-6">
+                  <h2 className="text-[18px] font-bold text-slate-text border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
+                    <Settings size={18} className="text-primary" /> Recent Signups
+                  </h2>
+                  <div className="space-y-3">
+                    {stats.recentUsers.map((u: any) => (
+                      <div key={u._id} className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-[8px] transition-colors border border-transparent hover:border-gray-100">
+                        <div>
+                          <div className="font-bold text-slate-text text-sm">{u.fullName}</div>
+                          <div className="text-xs text-cool-grey">{u.email}</div>
+                        </div>
+                        <div className="text-xs font-semibold text-cool-grey bg-gray-100 px-2 py-1 rounded">
+                          {new Date(u.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="p-4 rounded-[8px] bg-surface-muted border border-gray-200 flex gap-3 items-start">
-        <AlertCircle size={18} className="text-cool-grey shrink-0 mt-0.5" />
-        <p className="text-xs text-cool-grey leading-relaxed">
-          <strong>Grid Sync Info:</strong> Marking courts as 'Under Maintenance' automatically propagates to all customer slot searches instantly and overlays stripe hazards to prevent user locking attempts.
-        </p>
+          } />
+          <Route path="/venues" element={<AdminVenueManagement />} />
+          <Route path="/bookings" element={<AdminBookingManagement />} />
+        </Routes>
       </div>
     </div>
   )

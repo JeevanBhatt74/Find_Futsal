@@ -29,6 +29,22 @@ function ProtectedRoute() {
   return <Outlet />
 }
 
+// ─── Admin Route Wrapper ──────────────────────────────────────────────────────
+function AdminRoute() {
+  const { isAuthenticated, user } = useAuthStore()
+  const location = useLocation()
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/" replace />
+  }
+
+  return <Outlet />
+}
+
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -49,7 +65,11 @@ export default function App() {
             <Route path="/venues/:venueId/book"  element={<BookingPage />} />
             <Route path="/profile"               element={<ProfilePage />} />
             <Route path="/bookings"              element={<MyBookingsPage />} />
-            <Route path="/admin"                 element={<AdminDashboard />} />
+          </Route>
+
+          {/* Admin Routes */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin/*"               element={<AdminDashboard />} />
           </Route>
 
           <Route path="*"                      element={<NotFoundPage />} />

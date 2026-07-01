@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { useVenues } from '@/hooks/useVenues'
-import type { Venue } from '@/types'
+import type { Venue, Amenity } from '@/types'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -90,7 +90,7 @@ export default function VenuesPage() {
 
   // Get active backend amenities list
   const backendAmenities = useMemo(() => {
-    return activeAmenities.map(key => AMENITIES_MAP[key as keyof typeof AMENITIES_MAP])
+    return activeAmenities.map(key => AMENITIES_MAP[key as keyof typeof AMENITIES_MAP] as Amenity)
   }, [activeAmenities])
 
   // Query database venues
@@ -464,7 +464,7 @@ export default function VenuesPage() {
                           : "border-outline-variant hover:border-secondary hover:shadow-md"
                       )}
                     >
-                      <Link to={`/venues/${venue._id}`} className="absolute inset-0 z-0" />
+                      <Link to={`/venues/${venue._id}`} className="absolute inset-0 z-10" />
                       
                       {/* Image header */}
                       <div className="relative h-48 overflow-hidden bg-surface-container-high">
@@ -518,7 +518,7 @@ export default function VenuesPage() {
                         </p>
                         
                         {/* Footer details */}
-                        <div className="mt-auto pt-md border-t border-outline-variant flex items-center justify-between pointer-events-auto">
+                        <div className="mt-auto pt-md border-t border-outline-variant flex items-center justify-between pointer-events-auto relative z-20">
                           {/* Amenities list */}
                           <div className="flex gap-xs text-outline">
                             {venue.amenities.includes('Showers') && (

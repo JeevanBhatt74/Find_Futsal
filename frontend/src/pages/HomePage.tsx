@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store'
 import Logo from '@/components/layout/Logo'
+import { useVenues } from '@/hooks/useVenues'
 
 const FEATURED_COURTS = [
   {
@@ -44,7 +45,24 @@ const FEATURED_COURTS = [
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { isAuthenticated, user, clearAuth } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
+
+  // Fetch real courts for the featured section
+  const { data: venuesResponse, isLoading: isVenuesLoading } = useVenues({}, 1, 3)
+  const displayCourts = venuesResponse?.data && venuesResponse.data.length > 0 
+    ? venuesResponse.data.map((venue, index) => ({
+        id: venue._id,
+        name: venue.name,
+        location: venue.location.city,
+        distance: `${(1.2 + index * 1.3).toFixed(1)} km from center`,
+        rating: venue.rating || 4.5,
+        price: `Rs ${venue.pricePerHour}/hr`,
+        slotsToday: 4 - index,
+        badge: index === 0 ? { text: 'LIVE AVAILABILITY', position: 'right', style: 'bg-secondary-fixed text-on-secondary-fixed' } : null,
+        amenities: venue.amenities || [],
+        image: venue.images.find(i => i.isPrimary)?.url || venue.images[0]?.url || FEATURED_COURTS[0].image
+      }))
+    : FEATURED_COURTS;
 
   // Search state
   const [location, setLocation] = useState('')
@@ -73,13 +91,13 @@ export default function HomePage() {
         </div>
 
         <nav className="hidden md:flex justify-center gap-lg">
-          <a
-            className="font-label-bold text-label-bold text-primary pb-1 hover:text-primary transition-colors"
-            href="#search-section"
-            style={{ textDecoration: 'none', borderBottom: '2px solid #005129' }}
+          <Link
+            className="font-label-bold text-label-bold text-on-surface-variant pb-1 hover:text-primary transition-colors"
+            to="/venues"
+            style={{ textDecoration: 'none' }}
           >
             Find Courts
-          </a>
+          </Link>
           <Link
             className="font-label-bold text-label-bold text-on-surface-variant hover:text-primary transition-colors"
             to={isAuthenticated ? '/bookings' : '/login'}
@@ -160,14 +178,14 @@ export default function HomePage() {
               Skip the phone calls. Access real-time availability for the best futsal courts in the city. Your match starts here.
             </p>
             <div className="flex flex-wrap justify-center gap-md">
-              <a
+              <Link
                 className="bg-secondary-fixed text-on-secondary-fixed font-button text-button px-xl py-md rounded-lg flex items-center gap-sm shadow-xl hover:scale-105 transition-transform active:scale-95"
-                href="#search-section"
+                to="/venues"
                 style={{ textDecoration: 'none' }}
               >
                 <span className="material-symbols-outlined">search</span>
                 Find a Court
-              </a>
+              </Link>
               <Link
                 className="backdrop-blur-md text-white font-button text-button px-xl py-md rounded-lg hover:bg-white hover:text-primary transition-all active:scale-95"
                 to={isAuthenticated ? '/bookings' : '/login'}
@@ -328,13 +346,16 @@ export default function HomePage() {
           </div>
 
           <div className="max-w-6xl mx-auto flex overflow-x-auto pb-lg gap-lg snap-x no-scrollbar">
-            {FEATURED_COURTS.map((court) => (
-              <div 
-                key={court.id} 
-                className="bg-surface-container-lowest border border-outline-variant hover:border-secondary rounded-xl overflow-hidden group transition-all duration-300 flex flex-col shadow-sm hover:shadow-md snap-start relative" 
-                style={{ minWidth: '340px' }}
-              >
-                <Link to="/venues" className="absolute inset-0 z-0" />
+            {isVenuesLoading ? (
+              <div className="text-center w-full py-10 text-gray-500">Loading courts...</div>
+            ) : (
+              displayCourts.map((court) => (
+                <div 
+                  key={court.id} 
+                  className="bg-surface-container-lowest border border-outline-variant hover:border-secondary rounded-xl overflow-hidden group transition-all duration-300 flex flex-col shadow-sm hover:shadow-md snap-start relative" 
+                  style={{ minWidth: '340px' }}
+                >
+                  <Link to={`/venues/${court.id}`} className="absolute inset-0 z-10" />
                 
                 {/* Image Header */}
                 <div className="relative h-48 overflow-hidden bg-surface-container-high">
@@ -388,7 +409,7 @@ export default function HomePage() {
                   </p>
 
                   {/* Footer details */}
-                  <div className="mt-auto pt-md border-t border-outline-variant flex items-center justify-between pointer-events-auto">
+                  <div className="mt-auto pt-md border-t border-outline-variant flex items-center justify-between pointer-events-auto relative z-20">
                     {/* Amenities list */}
                     <div className="flex gap-xs text-outline">
                       {court.amenities.includes('Showers') && (
@@ -408,23 +429,24 @@ export default function HomePage() {
                     {/* Action button */}
                     {court.slotsToday > 0 ? (
                       <Link 
-                        to="/venues"
-                        className="bg-secondary text-on-secondary px-lg py-sm rounded-lg font-label-bold text-label-bold hover:bg-primary hover:text-white transition-all no-underline shadow-sm active:scale-95 block"
+                        to={`/venues/${court.id}`}
+                        className="bg-secondary text-on-secondary px-lg py-sm rounded-lg font-label-bold text-label-bold hover:bg-primary hover:text-white transition-all no-underline shadow-sm active:scale-95 block relative z-20"
                       >
                         Book Now
                       </Link>
                     ) : (
                       <Link 
-                        to="/venues"
-                        className="border-2 border-primary text-primary px-lg py-[6px] rounded-lg font-label-bold text-label-bold bg-white hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95 no-underline block"
+                        to={`/venues/${court.id}`}
+                        className="border-2 border-primary text-primary px-lg py-[6px] rounded-lg font-label-bold text-label-bold bg-white hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95 no-underline block relative z-20"
                       >
                         Notify Me
                       </Link>
                     )}
                   </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
 
@@ -539,10 +561,10 @@ export default function HomePage() {
         className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-sm border-t border-outline-variant shadow-md"
         style={{ background: 'rgba(247,250,243,0.9)', backdropFilter: 'blur(12px)' }}
       >
-        <a href="#search-section" className="flex flex-col items-center justify-center text-primary" style={{ textDecoration: 'none', fontWeight: 700 }}>
+        <Link to="/venues" className="flex flex-col items-center justify-center text-primary" style={{ textDecoration: 'none', fontWeight: 700 }}>
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>search</span>
           <span className="font-label-bold text-body-sm">Explore</span>
-        </a>
+        </Link>
         <Link to={isAuthenticated ? '/bookings' : '/login'} className="flex flex-col items-center justify-center text-on-surface-variant" style={{ textDecoration: 'none' }}>
           <span className="material-symbols-outlined">confirmation_number</span>
           <span className="font-label-bold text-body-sm">Bookings</span>

@@ -82,3 +82,18 @@ export const protect = async (
     next(error); // This will bubble up to the global error handler which natively parses JsonWebTokenError and TokenExpiredError
   }
 };
+
+/**
+ * Restrict middleware: Ensures the user has one of the specified roles.
+ * Must be used AFTER protect middleware.
+ */
+export const restrictTo = (...roles: string[]) => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action.', 403)
+      );
+    }
+    next();
+  };
+};
