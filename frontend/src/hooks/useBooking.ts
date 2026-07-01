@@ -1,6 +1,16 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
 import type { Slot, ApiResponse } from '@/types'
+
+export function useMyBookings() {
+  return useQuery({
+    queryKey: ['my-bookings'],
+    queryFn: async () => {
+      const response = await api.get<ApiResponse<any[]>>('/bookings/my')
+      return response.data.data || []
+    },
+  })
+}
 
 export function useBookingMutations() {
   const queryClient = useQueryClient()
@@ -47,6 +57,7 @@ export function useBookingMutations() {
       // Clear specific cache query paths upon successfully booked court
       queryClient.invalidateQueries({ queryKey: ['slots'] })
       queryClient.invalidateQueries({ queryKey: ['venues'] })
+      queryClient.invalidateQueries({ queryKey: ['my-bookings'] })
     },
   })
 

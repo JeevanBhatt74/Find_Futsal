@@ -37,6 +37,8 @@ export interface Venue {
   contactEmail?: string
   pricePerHour: number
   currency: string
+  surfaceType: string
+  cancellationPolicy: string
   isActive: boolean
   createdAt: string
   updatedAt: string

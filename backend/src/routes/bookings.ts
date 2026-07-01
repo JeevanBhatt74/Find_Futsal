@@ -36,6 +36,36 @@ const createBookingValidation = [
 // ─── Route Handlers ───────────────────────────────────────────────────────────
 
 /**
+ * @route   GET /api/v1/bookings/my
+ * @desc    Get all bookings for the logged-in user
+ * @access  Protected
+ */
+router.get(
+  '/my',
+  protect,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        return next(new AppError('Not authorized.', 401));
+      }
+
+      const bookings = await Booking.find({ userId: req.user._id })
+        .populate('venueId', 'name location images')
+        .populate('slotId', 'startTime endTime')
+        .sort({ createdAt: -1 });
+
+      res.status(200).json({
+        success: true,
+        count: bookings.length,
+        data: bookings,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * @route   POST /api/v1/bookings
  * @desc    Confirm booking from a held slot lock
  * @access  Protected

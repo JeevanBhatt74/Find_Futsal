@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   MapPin, Star, Phone, Clock, ChevronLeft, Calendar, AlertCircle,
-  ShowerHead, Car, Leaf, Wind, Zap, Coffee, CheckCircle2
+  ShowerHead, Car, Leaf, Wind, Zap, Coffee, CheckCircle2,
+  Image as ImageIcon, Layers, ShieldAlert, X
 } from 'lucide-react'
 import type { Slot } from '@/types'
 import { useBookingStore, useAuthStore } from '@/store'
@@ -22,6 +23,7 @@ const amenityIcons: Record<string, React.ElementType> = {
   'Air Con': Wind,
   'Floodlights': Zap,
   'Cafeteria': Coffee,
+  'Changing Rooms': ShowerHead,
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -39,6 +41,7 @@ export default function VenueDetailPage() {
 
   // ── States ──
   const [activeImage, setActiveImage] = useState(0)
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false)
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'))
@@ -126,28 +129,41 @@ export default function VenueDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* ── Left: Images + Info ──────────────────────────────────────── */}
         <div className="lg:col-span-3 flex flex-col gap-6">
-          {/* Image Gallery */}
-          <div className="rounded-xl overflow-hidden shadow-md">
-            <img
-              src={venue.images[activeImage]?.url ?? 'https://images.unsplash.com/photo-1562552052-d1a41db7f90b?w=800&q=80'}
-              alt={venue.name}
-              className="w-full h-72 sm:h-96 object-cover transition-all duration-500"
-            />
-            {venue.images.length > 1 && (
-              <div className="flex gap-2 mt-2 p-1 bg-surface rounded-lg">
-                {venue.images.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImage(i)}
-                    className={clsx(
-                      'w-20 h-14 rounded-md overflow-hidden border-2 transition-all duration-200 shrink-0',
-                      activeImage === i ? 'border-emerald-500 scale-95 shadow-sm' : 'border-transparent opacity-60 hover:opacity-90'
-                    )}
-                  >
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
+          {/* High-Fidelity Image Gallery Grid */}
+          <div className="relative rounded-2xl overflow-hidden bg-gray-100 group">
+            {venue.images.length >= 3 ? (
+              <div className="grid grid-cols-4 grid-rows-2 gap-1 h-72 sm:h-[400px]">
+                <div className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden" onClick={() => { setActiveImage(0); setIsGalleryOpen(true); }}>
+                  <img src={venue.images[0]?.url} alt={venue.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300" />
+                </div>
+                <div className="col-span-1 row-span-1 relative cursor-pointer overflow-hidden" onClick={() => { setActiveImage(1); setIsGalleryOpen(true); }}>
+                  <img src={venue.images[1]?.url} alt={venue.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300" />
+                </div>
+                <div className="col-span-1 row-span-1 relative cursor-pointer overflow-hidden" onClick={() => { setActiveImage(2); setIsGalleryOpen(true); }}>
+                  <img src={venue.images[2]?.url} alt={venue.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300" />
+                </div>
+                <div className="col-span-2 row-span-1 relative cursor-pointer overflow-hidden" onClick={() => { setActiveImage(3 % venue.images.length); setIsGalleryOpen(true); }}>
+                  <img src={venue.images[3 % venue.images.length]?.url} alt={venue.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center hover:bg-black/50 transition-colors duration-300">
+                    <span className="text-white font-semibold text-base sm:text-lg flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5"/> Show all photos
+                    </span>
+                  </div>
+                </div>
               </div>
+            ) : (
+              <div className="relative cursor-pointer h-72 sm:h-[400px] overflow-hidden" onClick={() => setIsGalleryOpen(true)}>
+                <img src={venue.images[0]?.url ?? 'https://images.unsplash.com/photo-1562552052-d1a41db7f90b?w=800&q=80'} alt={venue.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+              </div>
+            )}
+            
+            {venue.images.length < 3 && venue.images.length > 0 && (
+               <button onClick={() => setIsGalleryOpen(true)} className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md text-slate-text px-4 py-2.5 rounded-lg font-semibold text-sm shadow-sm hover:bg-white transition-colors flex items-center gap-2 border border-gray-200">
+                 <ImageIcon className="w-4 h-4"/> Show all photos
+               </button>
             )}
           </div>
 
@@ -165,18 +181,43 @@ export default function VenueDetailPage() {
               <MapPin size={14} className="text-emerald-500 shrink-0" />
               {venue.location.address}, {venue.location.city}
             </div>
-            <p className="text-gray-500 text-sm leading-relaxed mb-5">{venue.description}</p>
+            <p className="text-gray-500 text-sm leading-relaxed mb-8">{venue.description}</p>
+
+            {/* Technical Specifications */}
+            <div className="mb-8 border-t border-gray-100 pt-6">
+              <h4 className="text-lg font-semibold text-slate-text mb-4">Court Specifications</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3 p-4 bg-surface rounded-xl border border-gray-50 transition-colors hover:border-emerald-100 hover:bg-emerald-50/30">
+                  <div className="p-2.5 bg-white shadow-sm border border-gray-100 text-emerald-600 rounded-lg shrink-0">
+                    <Layers size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-0.5 font-medium uppercase tracking-wide">Surface Type</p>
+                    <p className="font-semibold text-slate-text">{venue.surfaceType || 'Artificial Turf'}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-surface rounded-xl border border-gray-50 transition-colors hover:border-emerald-100 hover:bg-emerald-50/30">
+                  <div className="p-2.5 bg-white shadow-sm border border-gray-100 text-emerald-600 rounded-lg shrink-0">
+                    <ShieldAlert size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-0.5 font-medium uppercase tracking-wide">Cancellation</p>
+                    <p className="font-semibold text-slate-text">{venue.cancellationPolicy || 'Flexible'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Amenities */}
-            <div>
-              <h4 className="text-sm font-semibold text-slate-text mb-3">Amenities</h4>
-              <div className="flex flex-wrap gap-3">
+            <div className="mb-8 border-t border-gray-100 pt-6">
+              <h4 className="text-lg font-semibold text-slate-text mb-4">Amenities</h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-4">
                 {venue.amenities.map(a => {
                   const Icon = amenityIcons[a] ?? CheckCircle2
                   return (
-                    <div key={a} className="flex items-center gap-2 px-3 py-2 rounded-md bg-surface text-sm">
-                      <Icon size={14} className="text-emerald-500" />
-                      <span className="text-slate-text font-medium">{a}</span>
+                    <div key={a} className="flex items-center gap-3">
+                      <Icon size={20} className="text-emerald-500 shrink-0" strokeWidth={1.5} />
+                      <span className="text-slate-text text-sm font-medium">{a}</span>
                     </div>
                   )
                 })}
@@ -392,6 +433,61 @@ export default function VenueDetailPage() {
                 Book & Pay
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Full Screen Image Gallery Modal ── */}
+      {isGalleryOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col animate-fade-in">
+          <div className="p-4 sm:p-6 flex justify-between items-center text-white shrink-0">
+            <div className="text-sm font-medium text-white/70">
+              {activeImage + 1} / {venue.images.length}
+            </div>
+            <button 
+              onClick={() => setIsGalleryOpen(false)}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          
+          <div className="flex-1 flex items-center justify-center p-4 min-h-0 relative">
+            <button 
+              onClick={(e) => { e.stopPropagation(); setActiveImage(prev => (prev > 0 ? prev - 1 : venue.images.length - 1)) }}
+              className="absolute left-4 sm:left-10 p-3 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors z-10"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            
+            <img 
+              src={venue.images[activeImage]?.url} 
+              alt={venue.name} 
+              className="max-w-full max-h-full object-contain"
+            />
+            
+            <button 
+              onClick={(e) => { e.stopPropagation(); setActiveImage(prev => (prev < venue.images.length - 1 ? prev + 1 : 0)) }}
+              className="absolute right-4 sm:right-10 p-3 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors z-10 rotate-180"
+            >
+              <ChevronLeft size={24} />
+            </button>
+          </div>
+          
+          {/* Thumbnails row at bottom */}
+          <div className="h-24 sm:h-32 p-4 flex gap-2 overflow-x-auto justify-center shrink-0">
+            {venue.images.map((img, idx) => (
+              <button 
+                key={idx}
+                onClick={() => setActiveImage(idx)}
+                className={clsx(
+                  "h-full aspect-video rounded-md overflow-hidden transition-all duration-200 flex-shrink-0",
+                  activeImage === idx ? "ring-2 ring-emerald-500 opacity-100" : "opacity-40 hover:opacity-70"
+                )}
+              >
+                <img src={img.url} className="w-full h-full object-cover" />
+              </button>
+            ))}
           </div>
         </div>
       )}
